@@ -13,12 +13,10 @@ asset DataAsset identified by dataHash {
     o String [] auth
 }
 
-
 transaction DataUpdate {
     --> DataAsset data
     o String new_value
 }
-
 
 
 transaction DataAuthUpdate {

@@ -1,4 +1,4 @@
-// specifically allow users to see historian records they invoked
+//Allow users to see historian records they invoked
 rule historianAccess{
   description: "Only allow members to read historian records referencing transactions they submitted."
   participant(p): "org.univpm.data_storage.Person"
@@ -9,7 +9,7 @@ rule historianAccess{
 }
 
 rule TestHistorian {
-  description: " Allow persons presents in auth array to read the asset "
+  description: " Disallow persons to read historian records "
   participant: "org.univpm.data_storage.Person"
   operation: READ
   resource: "org.hyperledger.composer.system.HistorianRecord"
@@ -45,7 +45,7 @@ rule SystemACL {
 
 
 rule EveryoneCanUpdateData {
-    description: "Allow all participants to submit transactions"
+    description: "Allow all participants to submit DataUpdate transactions"
     participant: "org.univpm.data_storage.Person"
     operation: CREATE
     resource: "org.univpm.data_storage.DataUpdate"
@@ -53,13 +53,12 @@ rule EveryoneCanUpdateData {
 }
 
 rule EveryoneCanUpdateAuthData {
-    description: "Allow all participants to submit transactions"
+    description: "Allow all participants to update the data authorized reader"
     participant: "org.univpm.data_storage.Person"
     operation: CREATE
     resource: "org.univpm.data_storage.DataAuthUpdate"
     action: ALLOW
 }
-
 
 rule OnlyOwnerCanUpdateData {
     description: "Only the owner can update its data"
