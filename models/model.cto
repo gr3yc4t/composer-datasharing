@@ -1,0 +1,29 @@
+namespace org.univpm.data_storage
+
+participant Person identified by pID {
+    o String pID
+    o String firstName
+    o String lastName
+}
+
+asset DataAsset identified by dataHash {
+    o String dataHash
+    o String value
+    --> Person owner
+    o String [] auth
+}
+
+
+transaction DataUpdate {
+    --> DataAsset data
+    o String new_value
+}
+
+
+
+transaction DataAuthUpdate {
+ 	--> DataAsset data
+    o String	  authID
+    o Boolean	  write_access	default=false
+}
+

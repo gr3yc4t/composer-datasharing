@@ -1,0 +1,132 @@
+// specifically allow users to see historian records they invoked
+rule historianAccess{
+  description: "Only allow members to read historian records referencing transactions they submitted."
+  participant(p): "org.univpm.data_storage.Person"
+  operation: READ
+  resource(r): "org.hyperledger.composer.system.HistorianRecord"
+  condition: (r.participantInvoking.getIdentifier() == p.getIdentifier())
+  action: ALLOW
+}
+
+rule TestHistorian {
+  description: " Allow persons presents in auth array to read the asset "
+  participant: "org.univpm.data_storage.Person"
+  operation: READ
+  resource: "org.hyperledger.composer.system.HistorianRecord"
+  action: DENY
+}
+
+//Network Admin Rules
+//------------------------------------------------------------------------------------
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+
+rule SystemACL {
+    description: "System ACL to permit all access"
+    participant: "org.hyperledger.composer.system.Participant"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+//---------------------------------------------------------------------------------------------------------
+
+
+rule EveryoneCanUpdateData {
+    description: "Allow all participants to submit transactions"
+    participant: "org.univpm.data_storage.Person"
+    operation: CREATE
+    resource: "org.univpm.data_storage.DataUpdate"
+    action: ALLOW
+}
+
+rule EveryoneCanUpdateAuthData {
+    description: "Allow all participants to submit transactions"
+    participant: "org.univpm.data_storage.Person"
+    operation: CREATE
+    resource: "org.univpm.data_storage.DataAuthUpdate"
+    action: ALLOW
+}
+
+
+rule OnlyOwnerCanUpdateData {
+    description: "Only the owner can update its data"
+    participant(m): "org.univpm.data_storage.Person"
+    operation: READ, CREATE, UPDATE
+    resource(v): "org.univpm.data_storage.DataAsset"
+    transaction(tx): "org.univpm.data_storage.DataUpdate"
+    condition: (tx.data.getIdentifier() == v.getIdentifier() && v.owner.getIdentifier()== m.getIdentifier())
+    action: ALLOW
+}
+
+rule OnlyOwnerCanUpdateAuthData {
+    description: "Description of the ACL rule"
+    participant(m): "org.univpm.data_storage.Person"
+    operation: READ, CREATE, UPDATE
+    resource(v): "org.univpm.data_storage.DataAsset"
+    transaction(tx): "org.univpm.data_storage.DataAuthUpdate"
+    condition: (tx.data.getIdentifier() == v.getIdentifier() && v.owner.getIdentifier()== m.getIdentifier())
+    action: ALLOW
+}
+
+
+rule ParticipantsArePublic {
+ 	description: "Each network participant is public"
+   	participant: "org.univpm.data_storage.Person"
+    operation: READ
+    resource: "org.univpm.data_storage.Person"
+  	action: ALLOW 
+}
+
+
+rule OnlyOwnerCanAccessTheirAsset{
+ 	description: "Initially only the owner can operate in their assets"
+  	participant(p): "org.univpm.data_storage.Person"
+  	operation: ALL
+    resource(r): "org.univpm.data_storage.DataAsset"
+    condition: (r.owner.getIdentifier() == p.getIdentifier())
+  	action: ALLOW
+}
+
+rule AuthCanReadData {
+  description: " Allow persons presents in auth array to read the asset "
+  participant(p): "org.univpm.data_storage.Person"
+  operation: READ
+  resource(r): "org.univpm.data_storage.DataAsset"
+  condition: ( r.auth && r.auth.indexOf(p.getIdentifier()) > -1)
+  action: ALLOW
+}
+
+
+rule AuthCanWriteData {
+  description: " Allow persons presents in auth array to read the asset "
+  participant(p): "org.univpm.data_storage.Person"
+  operation: UPDATE
+  resource(r): "org.univpm.data_storage.DataAsset"
+  transaction(tx): "org.univpm.data_storage.DataAuthUpdate"
+  condition: ( r.auth && r.auth.indexOf(p.getIdentifier()) > -1 && tx.write_access)
+  action: ALLOW
+}
+
+rule CanReadDataUp {
+  description: " Allow persons presents in auth array to read the asset "
+  participant(p): "org.univpm.data_storage.Person"
+  operation: READ
+  resource(r): "org.univpm.data_storage.DataUpdate"
+  condition: ( r.owner.getIdentifier() != p.getIdentifier() && r.data.auth.indexOf(p.getIdentifier()) <= -1)
+  action: DENY
+}
+
+
